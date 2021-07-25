@@ -1,3 +1,19 @@
+/*
+    Расположить файл в каталоге built_tools, либо web-apps-cryptopro
+
+    Схема каталогов
+        documenteditors
+            build_tools
+            web-apps           //оригинальный каталог onlyoffice
+            web-apps-cryptopro // изменения который необходимо произвести для интеграции криптопро функционала
+
+    Что делает код
+        * Выходит на уровнь выше, переходит в каталог web-apps-cryptopro.
+        * Делает обновление кода командой git pull.
+        * Cканирует все файлы в web-apps-cryptopro/web-apps
+        * Переносит все файлы в web-apps
+*/
+
 const fs = require('fs'),
     path = require('path'),
     scandir = require('scandir'),
