@@ -71,7 +71,7 @@ async function copyFiles(files) {
             (e) =>
                 new Promise((resolve, reject) => {
                     const source = path.resolve(e);
-                    const reqex = new RegExp(`[\\|\/]${WEB_APPS}-${CRYPTOPRO}`);
+                    const reqex = new RegExp(`[\\\\|\/]${WEB_APPS}-${CRYPTOPRO}`);
                     const target = source.replace(reqex, '');
 
                     function ensureDirectoryExistence(target) {
