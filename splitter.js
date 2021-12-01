@@ -2,17 +2,41 @@ const fs = require('fs')
 let data = fs.readFileSync('app.js', { encoding: 'utf8' }).split('\n')
 
 const webAppsPath = './web-apps/apps/'
-const substrings = [
-    "define('common/main/lib/controller/Protection'",
-    "define('common/main/lib/view/Protection'",
-
-    "define('documenteditor/main/app/controller/Main'",
-
-    "define('documenteditor/main/app/model/CryptoProModel'",
-    "define('documenteditor/main/app/view/CryptoProSign'",
-    "define('documenteditor/main/app/view/CryptoProDialog'"
-]
 const endSubstring = "})"
+const substrings = [{
+    searchStr: "define('common/main/lib/controller/Protection'",
+    addTopLines: 45,
+    addBottomLines: 0,
+    replaceStr: [{
+        from: 'Common.Controllers.Protection = Backbone.Controller.extend(_.extend({',
+        to: 'Common.Controllers.Protection = Backbone.Controller.extend(_.extend({ 123123'
+    }]
+},
+{
+    searchStr: "define('common/main/lib/view/Protection'",
+    addTopLines: 46,
+    addBottomLines: 0,
+    replaceStr: {
+        from: '',
+        to: ''
+    }
+},
+{
+    searchStr: "define('documenteditor/main/app/controller/Main'",
+    addTopLines: 44,
+    addBottomLines: 0,
+    replaceStr: {
+        from: '',
+        to: ''
+    }
+}
+
+
+
+// "define('documenteditor/main/app/model/CryptoProModel'",
+// "define('documenteditor/main/app/view/CryptoProSign'",
+// "define('documenteditor/main/app/view/CryptoProDialog'"
+]
 
 function saveFile(path, data) {
     const folders = path.split('/')
@@ -22,7 +46,7 @@ function saveFile(path, data) {
 
     folders.forEach((folder) => {
         createFolders += `/${folder}`
-        console.log('\n\rcreateFolders', createFolders)
+        // console.log('\n\rcreateFolders', createFolders)
         try {
             fs.mkdirSync(createFolders);
         } catch(err) {}
@@ -39,6 +63,8 @@ try {
 
 let fileData = ``
 let startIndex = 0;
+let indexSubstrings = -1;
+
 for (let i = 0, len = data.length; i < len; i++) {
     const str = data[i]
 
@@ -47,20 +73,39 @@ for (let i = 0, len = data.length; i < len; i++) {
             console.log('Найдено завершение index', i)
             const module = data[startIndex].match(/'[^']+'/)[0].replace(/\'/g, '')
 
-            startIndex = 0
             fileData += `${str}`
+            substrings[indexSubstrings].startIndex = startIndex
+            substrings[indexSubstrings].endIndex = i
+            fileData = transformModule(fileData, substrings[indexSubstrings])
             saveFile(`${webAppsPath}${module}.js`, fileData)
+
+            // reset params
+            startIndex = 0
+            indexSubstrings = -1
             fileData = ''
         } else {
             fileData += `${str}\n`
         }
     } else {
-        if (substrings.some(substr => str.includes(substr))) {
+        indexSubstrings = substrings.findIndex(e => str.includes(e.searchStr))
+
+        if (indexSubstrings != -1) {
             startIndex = i
-            console.log('')
             console.log('')
             console.log('Найдено совпадение:', str, 'startIndex', startIndex)
             fileData += `${str}\n`
         }
     }
+}
+function transformModule(moduleData, params) {
+    console.log(params)
+    let addTopStr = ``;
+    for (let i = (startIndex - params.addTopLines) , len = startIndex; i < len; i++) {
+        addTopStr += `${data[i]}\n`
+    }
+    let newStr = addTopStr += moduleData
+    console.log(newStr)
+
+
+    return newStr
 }
