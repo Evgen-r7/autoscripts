@@ -8,8 +8,8 @@ const substrings = [{
     addTopLines: 45,
     addBottomLines: 0,
     replaceStr: [{
-        from: 'Common.Controllers.Protection = Backbone.Controller.extend(_.extend({',
-        to: 'Common.Controllers.Protection = Backbone.Controller.extend(_.extend({ 123123'
+        from: '',
+        to: ''
     }]
 },
 {
@@ -23,12 +23,30 @@ const substrings = [{
 },
 {
     searchStr: "define('documenteditor/main/app/controller/Main'",
-    addTopLines: 44,
+    addTopLines: 42,
     addBottomLines: 0,
-    replaceStr: [{
-        from: '',
-        to: ''
-    }]
+    replaceStr: [
+        {
+            from: "define\\('documenteditor/main/app/controller/Main',\\[",
+            to: 'define(['
+        },
+        {
+            from: "http://r7-office.ru/",
+            to: '{{PUBLISHER_URL}}'
+        },
+        {
+            from: "sales@r7-office.ru",
+            to: '{{SALES_EMAIL}}'
+        },
+        {
+            from: "Р7-Офис",
+            to: '{{APP_TITLE_TEXT}}'
+        },
+        {
+            from: "R7-Office",
+            to: '{{COMPANY_NAME}}'
+        },
+    ]
 },
 {
     searchStr: "define('documenteditor/main/app/model/CryptoProModel'",
@@ -49,7 +67,7 @@ const substrings = [{
     }]
 },
 {
-    searchStr: "documenteditor/main/app/view/CryptoProDialog'",
+    searchStr: "define('documenteditor/main/app/view/CryptoProDialog'",
     addTopLines: 0,
     addBottomLines: 0,
     replaceStr: [{
@@ -67,7 +85,7 @@ function saveFile(path, data) {
 
     folders.forEach((folder) => {
         createFolders += `/${folder}`
-        // console.log('\n\rcreateFolders', createFolders)
+        // console.log('\r\n\rcreateFolders', createFolders)
         try {
             fs.mkdirSync(createFolders);
         } catch(err) {}
@@ -91,7 +109,7 @@ for (let i = 0, len = data.length; i < len; i++) {
 
     if (startIndex) {
         if ((str[0] === endSubstring[0]) && (str[1] === endSubstring[1])) {
-            console.log('Найдено завершение index', i)
+            // console.log('Найдено завершение index', i)
             const module = data[startIndex].match(/'[^']+'/)[0].replace(/\'/g, '')
 
             fileData += `${str}`
@@ -105,29 +123,36 @@ for (let i = 0, len = data.length; i < len; i++) {
             indexSubstrings = -1
             fileData = ''
         } else {
-            fileData += `${str}\n`
+            fileData += `${str}\r\n`
         }
     } else {
         indexSubstrings = substrings.findIndex(e => str.includes(e.searchStr))
 
         if (indexSubstrings != -1) {
             startIndex = i
-            console.log('')
-            console.log('Найдено совпадение:', str, 'startIndex', startIndex)
-            fileData += `${str}\n`
+            // console.log('\r\nНайдено совпадение:', str, 'startIndex', startIndex)
+            fileData += `${str}\r\n`
         }
     }
 }
 function transformModule(moduleData, params) {
-    console.log(params)
+    // console.log(params)
     let header = ``;
     for (let i = (params.startIndex - params.addTopLines) , len = startIndex; i < len; i++) {
-        header += `${data[i]}\n`
+        header += `${data[i]}\r\n`
     }
 
     let footer = ``;
     for (let i = params.endIndex, len = (params.endIndex + params.addBottomLines); i < len; i++) {
-        footer += `${data[i]}\n`
+        footer += `${data[i]}\r\n`
     }
-    return header + moduleData + footer
+    let result = header + moduleData + footer
+
+    
+    params.replaceStr.forEach(param => {
+        const regex = new RegExp(param.from, "g")
+        result = result.replace(regex, param.to)
+    })
+    return result
 }
+
