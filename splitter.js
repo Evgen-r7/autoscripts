@@ -16,26 +16,47 @@ const substrings = [{
     searchStr: "define('common/main/lib/view/Protection'",
     addTopLines: 46,
     addBottomLines: 0,
-    replaceStr: {
+    replaceStr: [{
         from: '',
         to: ''
-    }
+    }]
 },
 {
     searchStr: "define('documenteditor/main/app/controller/Main'",
     addTopLines: 44,
     addBottomLines: 0,
-    replaceStr: {
+    replaceStr: [{
         from: '',
         to: ''
-    }
+    }]
+},
+{
+    searchStr: "define('documenteditor/main/app/model/CryptoProModel'",
+    addTopLines: 0,
+    addBottomLines: 0,
+    replaceStr: [{
+        from: '',
+        to: ''
+    }]
+},
+{
+    searchStr: "define('documenteditor/main/app/view/CryptoProSign'",
+    addTopLines: 0,
+    addBottomLines: 0,
+    replaceStr: [{
+        from: '',
+        to: ''
+    }]
+},
+{
+    searchStr: "documenteditor/main/app/view/CryptoProDialog'",
+    addTopLines: 0,
+    addBottomLines: 0,
+    replaceStr: [{
+        from: '',
+        to: ''
+    }]
 }
-
-
-
-// "define('documenteditor/main/app/model/CryptoProModel'",
-// "define('documenteditor/main/app/view/CryptoProSign'",
-// "define('documenteditor/main/app/view/CryptoProDialog'"
 ]
 
 function saveFile(path, data) {
@@ -75,7 +96,7 @@ for (let i = 0, len = data.length; i < len; i++) {
 
             fileData += `${str}`
             substrings[indexSubstrings].startIndex = startIndex
-            substrings[indexSubstrings].endIndex = i
+            substrings[indexSubstrings].endIndex = (i + 1)
             fileData = transformModule(fileData, substrings[indexSubstrings])
             saveFile(`${webAppsPath}${module}.js`, fileData)
 
@@ -99,13 +120,14 @@ for (let i = 0, len = data.length; i < len; i++) {
 }
 function transformModule(moduleData, params) {
     console.log(params)
-    let addTopStr = ``;
-    for (let i = (startIndex - params.addTopLines) , len = startIndex; i < len; i++) {
-        addTopStr += `${data[i]}\n`
+    let header = ``;
+    for (let i = (params.startIndex - params.addTopLines) , len = startIndex; i < len; i++) {
+        header += `${data[i]}\n`
     }
-    let newStr = addTopStr += moduleData
-    console.log(newStr)
 
-
-    return newStr
+    let footer = ``;
+    for (let i = params.endIndex, len = (params.endIndex + params.addBottomLines); i < len; i++) {
+        footer += `${data[i]}\n`
+    }
+    return header + moduleData + footer
 }
